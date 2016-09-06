@@ -16,8 +16,8 @@ setup(
 
     license="LICENSE.txt",
 
-    description="A python client library for a more pleasant experience with pdf-server",
-    long_description=open("README.txt").read(),
+    description="A python client library for a more pleasant experience with pdf-server (https://github.com/nathanielove/pdf-server)",
+    # long_description=open("README.txt").read(),
 
     install_requires=[
         "requests",
