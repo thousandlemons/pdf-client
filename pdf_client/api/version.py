@@ -1,4 +1,4 @@
-from api.base import BaseRequest
+from pdf_client.api.base import BaseRequest
 
 
 class VersionRequest(BaseRequest):

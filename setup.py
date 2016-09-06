@@ -1,32 +1,24 @@
 from distutils.core import setup
 
 setup(
-    # Application name:
-    name="MyApplication",
+    name="pdf_client",
 
-    # Version number (initial):
-    version="0.1.0",
+    version="1.2",
 
-    # Application author details:
-    author="name surname",
-    author_email="name@addr.ess",
+    author="SUN Ximeng (Nathaniel)",
+    author_email="nathaniel@bretty.io",
 
-    # Packages
-    packages=["app"],
+    packages=["pdf_client", "pdf_client.api"],
 
-    # Include additional files into the package
     include_package_data=True,
 
-    # Details
-    url="http://pypi.python.org/pypi/MyApplication_v010/",
+    url="https://github.com/nathanielove/pdf-client",
 
-    #
-    # license="LICENSE.txt",
-    description="Useful towel-related stuff.",
+    license="LICENSE.txt",
 
-    # long_description=open("README.txt").read(),
+    description="A python client library for a more pleasant experience with pdf-server",
+    long_description=open("README.txt").read(),
 
-    # Dependent packages (distributions)
     install_requires=[
         "requests",
     ],
