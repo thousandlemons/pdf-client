@@ -6,7 +6,7 @@ This is a python client library for a more pleasant experience with [pdf-server]
 
 ## Latest Release
 
-The latest release is pdf_client v1.2, released on 6 Sep 2016.
+The latest release is pdf_client v1.4, released on 6 Sep 2016.
 
 To install the package using pip:
 
