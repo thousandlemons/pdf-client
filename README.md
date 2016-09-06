@@ -78,5 +78,3 @@ It has four modules:
 ### Module `version`
 
 ### Module `content`
-
-
