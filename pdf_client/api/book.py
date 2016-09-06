@@ -1,4 +1,4 @@
-from api.base import ReadOnlyRequest
+from pdf_client.api.base import ReadOnlyRequest
 
 
 class BookRequest(ReadOnlyRequest):
