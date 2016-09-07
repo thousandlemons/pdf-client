@@ -1,3 +1,4 @@
+from pdf_client import config
 from pdf_client.api.base import ReadOnlyRequest
 
 
@@ -16,3 +17,7 @@ class Children(SectionRequest):
 
 class Versions(SectionRequest):
     partial_url = 'versions/'
+
+
+class Toc(SectionRequest):
+    partial_url = 'toc/'
