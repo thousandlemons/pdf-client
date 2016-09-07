@@ -16,3 +16,7 @@ class Children(SectionRequest):
 
 class Versions(SectionRequest):
     partial_url = 'versions/'
+
+
+class Toc(SectionRequest):
+    partial_url = 'toc/'

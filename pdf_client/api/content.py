@@ -23,7 +23,7 @@ class Post(ContentRequest):
 
     def __init__(self, *url_params, text, auth=None):
         super().__init__(*url_params, auth=auth)
-        self.data = text
+        self.data = text.encode('utf-8')
 
     def on_success(self, response):
         return True
