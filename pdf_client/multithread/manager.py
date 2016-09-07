@@ -1,40 +1,30 @@
-import random
-import time
-from concurrent import futures
-from threading import Thread
+from pdf_client.api import content, section
+
+class BaseTextProcessor(object):
+    def process(self, text, section_id):
+        pass
 
 
-class JobRunner(Thread):
-    def __init__(self, executor):
-        super().__init__()
-        self.executor = executor
+class MultiThreadTextProcessor(object):
+    processor = None
 
-    def run(self):
-        future_list = []
+    section_id = None
 
-        for i in range(20):
-            print("Submitted {i}".format(i=i))
-            future_list.append(self.executor.submit(mock_long_io, i))
-            time.sleep(0.1)
+    source_version_id = None
+    target_version_id = None
 
-        for future in futures.as_completed(future_list):
-            print("Completed {i}".format(i=future.result()))
+    create = False
+    new_name = None
 
+    _executor = None
+    future_list = []
 
-class MultiThreadJobRunner(Thread):
-    max_workers = None
+    def _process_section(self, section_id):
+        text = content.Immediate(section_id, self.source_version_id).send_request()
+        text = self.processor.process(text)
+        if self.target_version_id:
+            content.Post(section_id, self.target_version_id, text=text).send_request()
+        return text, section_id
 
-
-def mock_long_io(i):
-    print("Processing {i}".format(i=i))
-    time.sleep(random.uniform(1, 10))
-    return i
-
-
-def main():
-    executor = futures.ThreadPoolExecutor(max_workers=5)
-    job_submitter = JobRunner(executor)
-    job_submitter.start()
-
-
-main()
+    def _recursive_submit(self):
+        pass
