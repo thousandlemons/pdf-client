@@ -1,4 +1,3 @@
-from pdf_client import config
 from pdf_client.api.base import ReadOnlyRequest
 
 
