@@ -11,7 +11,7 @@ The latest release is pdf_client v1.4, released on 6 Sep 2016.
 To install the package using pip:
 
 ```bash
-$ pip install pdf_client
+$ pip install pdf-client
 ```
 
 ## Quickstart
