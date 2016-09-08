@@ -6,7 +6,7 @@ This is a python client library for a more pleasant experience with [pdf-server]
 
 ## Latest Release
 
-The latest release is pdf_client v1.4, released on 6 Sep 2016.
+The latest release is pdf_client v1.1, released on 8 Sep 2016.
 
 To install the package using pip:
 
@@ -48,10 +48,10 @@ The result will be a `list` of `dict` objects, for example
 
 First, make sure you have a configuration file as said in the previous section.
 
-Then, create a class to extend `MultiThreadWorker:
+Then, create a class to extend `TextProcessor`:
 
 ```python
-from pdf_client.multithread.worker import TextProcessor
+from pdf_client.multithread.processor import TextProcessor
 
 class ExampleProcessor(TextProcessor):
 	def process(self, text, section_id):
