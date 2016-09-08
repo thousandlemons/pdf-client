@@ -1,5 +1,16 @@
 import requests
 
+ERROR_MESSAGE_NO_CONFIG = '''
+
+No configuration found!
+Add the following before you call send_request()
+
+    from pdf_client import config
+    config.load_from_file('...')
+
+For more info, please visit https://github.com/nathanielove/pdf-client
+'''
+
 
 class BaseRequest(object):
     base_url = None
@@ -42,6 +53,10 @@ class BaseRequest(object):
         return False
 
     def send_request(self):
+
+        if self.base_url is None:
+            raise Exception(ERROR_MESSAGE_NO_CONFIG)
+
         try:
             response = requests.request(method=self.get_method(), url=self.get_full_url(), data=self.get_data(),
                                         auth=self.get_auth())
