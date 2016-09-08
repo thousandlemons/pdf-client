@@ -1,15 +1,8 @@
-from abc import abstractmethod
 from concurrent import futures
 
 from pdf_client.api import book
 from pdf_client.api import content, section
 from pdf_client.api import version
-
-
-class TextProcessor(object):
-    @abstractmethod
-    def process(self, text, section_id):
-        pass
 
 
 class MultiThreadWorker(object):

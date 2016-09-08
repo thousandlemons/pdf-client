@@ -1,7 +1,5 @@
 import json
 
-import requests
-
 from pdf_client.api.base import BaseRequest
 
 KEY_BASE_URL = 'base_url'
