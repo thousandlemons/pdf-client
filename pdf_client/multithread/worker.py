@@ -15,7 +15,7 @@ class TextProcessor(object):
 class MultiThreadWorker(object):
     processor = None
 
-    threads = None
+    threads = 10
     _executor = None
     _future_list = []
 
@@ -26,7 +26,7 @@ class MultiThreadWorker(object):
     target_version = None
 
     create = False
-    new_name = None
+    name = None
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -37,7 +37,7 @@ class MultiThreadWorker(object):
         text = self.processor.process(text, section_id)
         if self.target_version:
             content.Post(section_id, self.target_version, text=text).send_request()
-        return text, section_id
+        return section_id, text
 
     def _recursive_submit(self, node):
         self._future_list.append(self._executor.submit(self._process_section, node['id']))
@@ -50,7 +50,7 @@ class MultiThreadWorker(object):
             self.source_version = version.List().send_request()[0]['id']
 
         if self.create:
-            new_version = version.Create(self.new_name).send_request()
+            new_version = version.Create(self.name).send_request()
 
             if not new_version:
                 return []
