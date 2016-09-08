@@ -16,6 +16,8 @@ $ pip install pdf_client
 
 ## Quickstart
 
+### Use API Wrappers
+
 First, create a configuration file `config.json` in your project directory:
 
 ```json
@@ -42,6 +44,46 @@ The result will be a `list` of `dict` objects, for example
 [{'title': 'Sample Book', 'root_section': 779, 'id': 2}]
 ```
 
+### Run a Multithreaded Text Process Job
+
+First, make sure you have a configuration file as said in the previous section.
+
+Then, create a class to extend `MultiThreadWorker:
+
+```python
+from pdf_client.multithread.worker import TextProcessor
+
+class ExampleProcessor(TextProcessor):
+	def process(self, text, section_id):
+		# do some processing here
+		return text
+```
+
+Finally, create a worker and start:
+
+```python
+from pdf_client.multithread.worker import MultiThreadWorker
+from demo import ExampleProcessor		# the one we just created
+
+config.load_from_file('config.json')	# load configuration
+
+processor = ExampleProcessor()			# the text processor we just created
+worker = MultiThreadWorker(processor=processor
+                           book=2,				# book id
+                           threads=10,			# total no. of threads
+                           create=True,			# create a new version
+                           name='New Version'	# new version name
+                           )
+completed = worker.start()	# start the worker and return an iterator
+
+for future in completed:	# the iterator will run in the order of completion
+	section_id, text = future.result()
+	print('Completed section ID: {id}'.format(id=section_id))
+
+```
+
+
+
 ## The `pdf_client.config` module
 
 ### `load_from_file()`
@@ -61,6 +103,8 @@ There are methods to be called at runtime to load/update the global configuratio
 * `set_base_url(base_url)`
 * `set_auth(auth)`
 * `set_basic_auth(username, password)`, as a shortcut
+
+## The 
 
 ## The `pdf_client.api` Package
 
