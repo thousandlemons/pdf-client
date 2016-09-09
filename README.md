@@ -6,7 +6,7 @@ This is a python client library to provide a more pleasant experience with [pdf-
 
 ## Latest Release
 
-The latest release is pdf_client v1.2.1, released on 9 Sep 2016.
+The latest release is pdf_client v2.0, released on 9 Sep 2016.
 
 To install the package using pip:
 
@@ -32,9 +32,9 @@ Then, create a `main.py` and try the following:
 ```python
 from pdf_client import config
 from pdf_client.api import book
-
+execute(
 config.load_from_file('config.json')	# load configuration
-book_list = book.List().send_request()	# send HTTP requests using client library
+book_list = book.List().execute()	# send HTTP requests using client library
 print(book_list)
 ```
 
@@ -128,8 +128,8 @@ Hence, the `MultiThreadWorker` in `pdf_client.multithread.worker` module impleme
 | `threads` | `int` | Total number of threads used in parallel. <br> The default value is 10.
 | `book` | `int` | The book id to start as the root section. <br> If this parameter is left blank, the `section` parameter must be present.
 | `section` | `int` | The section id to start as the root section. <br> If `book` is present, this parameter will be ignored.
-| `source_version` | `int` | The version id, used by the worker to get the text content from the server. <br> If blank, the first version id ("Raw" by default) returned in the `/version/list/` API will be used. 
-| `target_version` |`int` | The version id, used by the worker to post the processed texts back to the server. <br> If left blank, the worker will check the `create` parameter. <br> If both this parameter and `create` are blank, the worker is in read-only mode, and no text will be posted to the server.
+| `source` | `int` | The source version id, used by the worker to get the text content from the server. <br> If blank, the first version id ("Raw" by default) returned in the `/version/list/` API will be used. 
+| `target` |`int` | The target version id, used by the worker to post the processed texts back to the server. <br> If left blank, the worker will check the `create` parameter. <br> If both this parameter and `create` are blank, the worker is in read-only mode, and no text will be posted to the server.
 | `create` | `bool` | Set it `True` to create a version on the server as `target_version`. <br> If `target_version` is present, this parameter will be ignored, and no version will be created on the server. 
 | `name` | `string` | The name of the version to be created. <br> This parameter must be present together with `create`.
 
@@ -165,40 +165,78 @@ logging.getLogger(pdf_client.multithread.worker.__name__).setLevel(logging.INFO)
 ```
 
 
-## The Complete `pdf_client.api` Package
+## Package `pdf_client.api`
 
-### Module `book`
+This package provide wrapper modules for the APIs in the [pdf-server](https://github.com/nathanielove/pdf-server/tree/improve/doc) project.
 
-| Example | Coressponding URL | 
-| --- | --- | 
-| `List()` | `/book/list/`
-| `Detail(1)` | `/book/detail/<pk>/`
+Basically, for whatever parameter in the URLs, just pass them to the constructor in order. For example,
 
-### Module `section`
+```python
+from pdf_client.api import version, book, content
 
-### Module `version`
+version.Detail(3)			# ==> /version/detail/3/
+book.Toc(2)					# ==> /book/toc/2/
+content.Immediate(3260, 3)	# ==> /content/immediate/3206/3/
+```
 
-### Module `content`
+Then, by calling `execute()` on the object you created, the library will send the HTTP request to the RESTful server. It will return the python `list` or `dict` object (or just `string` for `content` module) if the RESTful API returns anything. 
+
+If the operation is successful and the API does not return anything (e.g. delete a version), it will return `True`. If anything goes wrong (any exception, error, or the API returns a different status code than expected) within the `execute()`, it will return `False`
 
 ## Appendix
 
+### More Examples on `pdf_client.api`
+
+Create a version:
+
+```python
+from pdf_client import config
+from pdf_client.api import version
+
+config.load_from_file('config.json')
+version.Create(name="My New Version").execute()
+```
+
+Update a version:
+
+```python
+from pdf_client import config
+from pdf_client.api import version
+
+config.load_from_file('config.json')
+version.Update(5, name="Another Name").execute()
+```
+
+Write a whole book to file:
+
+```python
+from pdf_client import config
+from pdf_client.api import book, content
+
+config.load_from_file('config.json')
+root_section = book.List().execute()[0]['root_section']
+text = content.Aggregate(root_section).execute()
+
+with open('book.txt', 'w+') as file:
+	file.write(text)
+
+```
+
 ### More Examples on `MultiThreadWorker ` Constructor
 
-#### Read the default version
-
-The entire book:
+Get the entire book in the default version:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(), book=3)
 ```
 
-Or start from a specific section and all its descendants:
+Or start from a specific section and then all its descendants:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(), section=680)
 ```
 
-#### Specify how many threads to use
+Specify how many threads to use:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(),
@@ -207,23 +245,23 @@ worker = MultiThreadWorker(processor=ExampleProcessor(),
 
 ```
 
-#### Read a specific version
+Read a specific version:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(),
                            book=4,
-                           source_version=18)
+                           source=18)
 ```
 
-#### Write the processed texts to a specific version
+Write the processed texts to a specific version:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(),
                            book=4,
-                           target_version=18)
+                           target=18)
 ```
 
-#### Create a version to save the processed texts
+Create a version to save the processed texts:
 
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(),
@@ -232,12 +270,13 @@ worker = MultiThreadWorker(processor=ExampleProcessor(),
                            name="My New Version")
 ```
 
-#### Put everything together
+Put everything together:
+
 ```python
 worker = MultiThreadWorker(processor=ExampleProcessor(),
                            threads=20,
                            book=4,
-                           source_version=6,
+                           source=6,
                            create=True,
                            name="My New Version")
 ```
@@ -248,7 +287,7 @@ Or maybe
 worker = MultiThreadWorker(processor=ExampleProcessor(),
                            threads=20,
                            section=576,
-                           source_version=12,
-                           target_version=20)
+                           source=12,
+                           target=20)
 ```
 
