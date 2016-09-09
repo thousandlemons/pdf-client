@@ -20,6 +20,7 @@ This is a python client library to provide a more pleasant experience with [pdf-
 * [Appendix](#Appendix)
 	* [More Examples on `pdf_client.api` Modules](#api-example)
 	* [More Examples on `MultiThreadWorker ` Constructor](#worker-example)
+	* [A Recipe of Multithreaded Text Processing: Removing Digits](#Recipe)
 
 
 ## <a name="release" style="color: #000;"></a> Install
@@ -81,6 +82,7 @@ class ExampleProcessor(TextProcessor):
 Finally, create a worker and start:
 
 ```python
+from pdf_client import config
 from pdf_client.multithread.worker import MultiThreadWorker
 from demo import ExampleProcessor		# the one we just created
 
@@ -325,3 +327,33 @@ worker = MultiThreadWorker(processor=ExampleProcessor(),
                            target=20)
 ```
 
+### <a name="Recipe" style="color: #000;"></a> A Recipe of Multithreaded Text Processing: Removing Digits
+
+```python
+import re
+import logging
+
+import pdf_client
+from pdf_client import config
+from pdf_client.multithread.worker import MultiThreadWorker
+from pdf_client.multithread.processor import TextProcessor
+
+class MyProcessor(TextProcessor):
+	def process(self, text, section_id):
+		return re.sub(r'\d+', '', text)
+		
+def main():
+	# enable INFO level logging
+	logging.basicConfig()
+	logging.getLogger(pdf_client.multithread.worker.__name__).setLevel(logging.INFO)
+	
+	# load global config
+	config.load_from_file('config.json')
+	
+	worker = MultiThreadWorker(processor=MyProcessor(), book=3, new=True, name="Removed Digits")
+	
+	completed = worker.start()
+	for future in completed:
+		section_id, text = future.result()
+		# do something else
+```
