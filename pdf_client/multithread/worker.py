@@ -68,6 +68,9 @@ class MultiThreadWorker(object):
                 return []
 
         elif self.create:
+            if not self.name:
+                _LOGGER.error("No version name specified. Returning empty array.")
+
             new_version = version.Create(self.name).send_request()
 
             if not new_version:
@@ -77,7 +80,7 @@ class MultiThreadWorker(object):
             self.target_version = new_version['id']
 
         else:
-            _LOGGER.error("No target version is specified or can be inferred. Returning empty array.")
+            _LOGGER.info("No target version specified. In read-only mode.")
 
         toc = book.Toc(self.book).send_request() if self.book else section.Toc(self.section).send_request()
 
