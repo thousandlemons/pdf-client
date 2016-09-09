@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name="pdf-client",
 
-    version="1.1",
+    version="1.1.1",
 
     author="SUN Ximeng (Nathaniel)",
     author_email="nathaniel@bretty.io",
