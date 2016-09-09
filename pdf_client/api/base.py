@@ -49,6 +49,9 @@ class BaseRequest(object):
     def on_success(self, response):
         return response.json()
 
+    def on_exception(self, e):
+        return False
+
     def on_error(self, response):
         return False
 
@@ -60,8 +63,8 @@ class BaseRequest(object):
         try:
             response = requests.request(method=self.get_method(), url=self.get_full_url(), data=self.get_data(),
                                         auth=self.get_auth())
-        except requests.exceptions.RequestException:
-            return self.on_error(None)
+        except requests.exceptions.RequestException as e:
+            return self.on_exception(e)
 
         if response.status_code == self.expected_status_code:
             return self.on_success(response)
