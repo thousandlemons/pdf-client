@@ -1,10 +1,30 @@
 # PDF Client
 
-## Introduction
+## <a name="intro" style="color: #000;"></a> Introduction
 
 This is a python client library to provide a more pleasant experience with [pdf-server](https://github.com/nathanielove/pdf-server)
 
-## Latest Release
+## Table of Content
+
+* [Install](#release)
+* [Quickstart](#quickstart)
+	* [Config & API Wrappers](#config-wrapper)
+	* [Multithreaded Text Processing](#multith)
+* [Module `pdf_client.config`](#config)
+	* [`load_from_file()`](#loadff)
+	* [Update Configuration at Runtime](#update-config)
+* [Class `MultiThreadWorker`]('#worker')
+	* [Workflow](#workflow)
+	* [Parameters in Constructor](#params)
+	* [`start()`](#start)
+	* [Logging](#Logging)
+* [Package `pdf_client.api`](#api)
+* [Appendix](#Appendix)
+	* [More Examples on `pdf_client.api` Modules](#api-example)
+	* [More Examples on `MultiThreadWorker ` Constructor](#worker-example)
+
+
+## <a name="release" style="color: #000;"></a> Install
 
 The latest release is pdf_client v2.0, released on 9 Sep 2016.
 
@@ -14,9 +34,9 @@ To install the package using pip:
 $ pip install pdf-client
 ```
 
-## Quickstart
+## <a name="quickstart" style="color: #000;"></a> Quickstart
 
-### Config & API Wrappers
+### <a name="config-wrapper" style="color: #000;"></a> Config & API Wrappers
 
 First, create a configuration file `config.json` in your project directory:
 
@@ -32,19 +52,19 @@ Then, create a `main.py` and try the following:
 ```python
 from pdf_client import config
 from pdf_client.api import book
-execute(
+
 config.load_from_file('config.json')	# load configuration
-book_list = book.List().execute()	# send HTTP requests using client library
+book_list = book.List().execute()		# send HTTP request to RESTful API
 print(book_list)
 ```
 
-The result will be a `list` of `dict` objects, for example
+The result will be a `list` of `dict`s, for example
 
 ```python
 [{'title': 'Sample Book', 'root_section': 779, 'id': 2}]
 ```
 
-### Multithreaded Text Processing
+### <a name="multith" style="color: #000;"></a> Multithreaded Text Processing
 
 First, make sure you have a configuration file as said in the previous section.
 
@@ -73,21 +93,18 @@ worker = MultiThreadWorker(processor=processor
                            book=3,				# book id
                            threads=10,			# total no. of threads
                            create=True,			# create a new version
-                           name='New Version'	# new version name
-                           )
-completed = worker.start()	# start the worker and return an iterator
+                           name='New Version')	# new version name
 
+completed = worker.start()	# start the worker and return an iterator
 for future in completed:	# the iterator will loop in the order of completion
 	section_id, text = future.result()
 	print('Completed section ID: {id}'.format(id=section_id))
 
 ```
 
+## <a name="config" style="color: #000;"></a> Module `pdf_client.config`
 
-
-## Module `pdf_client.config`
-
-### `load_from_file()`
+### <a name="loadff" style="color: #000;"></a> `load_from_file()`
 
 This method loads a json file as global configuration.
 
@@ -97,18 +114,18 @@ There are three fields in the json file:
 * `auth_class` *(optional)*: one of the classes in `request.auth` package - `HTTPBasicAuth`, `HTTPDigestAuth` or `HTTPProxyAuth`
 * `auth_args` *(optional)*: arguments to be passed into the constructor of `auth_class`
 
-### Update Configuration at Runtime
+### <a name="update-config" style="color: #000;"></a> Update Configuration at Runtime
 
 There are methods to be called at runtime to load/update the global configuration:
 
 * `set_base_url(base_url)`
-* `set_auth(auth)` - see ["Authentication"](http://docs.python-requests.org/en/master/user/authentication/) for package `requests`
+* `set_auth(auth)` - see "[Authentication](http://docs.python-requests.org/en/master/user/authentication/)" from package `requests`
 * `set_basic_auth(username, password)`, as a shortcut
 
 
-## Class `MultiThreadWorker`
+## <a name="worker" style="color: #000;"></a> Class `MultiThreadWorker`
 
-### Introduction
+### <a name="workflow" style="color: #000;"></a> Workflow
 
 Text processing jobs are pretty similar. They always do the following:
 
@@ -120,7 +137,7 @@ Text processing jobs are pretty similar. They always do the following:
 Hence, the `MultiThreadWorker` in `pdf_client.multithread.worker` module implements the typical workflow, and handles all the details for you.
 
 
-### Parameters in Constructor
+### <a name="params" style="color: #000;"></a> Parameters in Constructor
 
 | Parameter | Type | Explanation | 
 | --- | --- | --- |
@@ -134,9 +151,9 @@ Hence, the `MultiThreadWorker` in `pdf_client.multithread.worker` module impleme
 | `name` | `string` | The name of the version to be created. <br> This parameter must be present together with `create`.
 
 
-### `start()`
+### <a name="start" style="color: #000;"></a> `start()`
 
-Call this method to start the worker.
+Call this method to start the worker immediately.
 
 It will return an iterator over [`concurrent.futures.Future`](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Future) objects, in the order of completion. Under the hood, it returns the result of [`concurrent.futures.as_completed()`](https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Future). Let's consider this example:
 
@@ -148,13 +165,23 @@ for future in completed:
 	print("Completed {id}".format(id=section_id))
 ```
 
-Although the text processing jobs are submitted to the worker threads by pre-order tree traversal, they may complete in a different order, since network IO may take different amount of time. So the `for` loop here gives whichever completes first, and blocks if it has to, until there is one completed.
+Although the text processing jobs are submitted to the worker threads by pre-order tree traversal, they may complete in a different order, since network IO may take different amount of time. So the `for` loop here gives whichever `Future` completes first, and blocks when waiting for the threads, until there is one completed.
 
-### Logging
+However, **if you pass incorrect values or combinations of parameters to the constructor, an empty `list` will be returned**. To check this, you can either enable logging (see the section below), or do this:
+
+```python
+completed = worker.start()
+if not completed:
+	# do something to handle error
+else:
+	# do things as expected
+```
+
+### <a name="Logging" style="color: #000;"></a> Logging
 
 Since the text processing may take a really long time, you can use logging to monitor the progress or record anything that went wrong.
 
-To enable logging of this module:
+**DON'T use `print()` to show the progress while looping through the `Future`s**. Instead, enable INFO-level logging of this module:
 
 ```python
 import logging
@@ -164,8 +191,9 @@ logging.basicConfig()
 logging.getLogger(pdf_client.multithread.worker.__name__).setLevel(logging.INFO)
 ```
 
+The logs generated in this module are pretty comprehensive. They contain the progress and any exception that occured.
 
-## Package `pdf_client.api`
+## <a name="api" style="color: #000;"></a> Package `pdf_client.api`
 
 This package provide wrapper modules for the APIs in the [pdf-server](https://github.com/nathanielove/pdf-server/tree/improve/doc) project.
 
@@ -179,13 +207,21 @@ book.Toc(2)					# ==> /book/toc/2/
 content.Immediate(3260, 3)	# ==> /content/immediate/3206/3/
 ```
 
+For json data in request message body, use keyword arguements in the constructor. For example,
+
+```python
+version.Update(5, name="Another Name").execute()
+```
+
+Please refer to [Appendix](#api-example) to see more example on the argument keywords.
+
 Then, by calling `execute()` on the object you created, the library will send the HTTP request to the RESTful server. It will return the python `list` or `dict` object (or just `string` for `content` module) if the RESTful API returns anything. 
 
 If the operation is successful and the API does not return anything (e.g. delete a version), it will return `True`. If anything goes wrong (any exception, error, or the API returns a different status code than expected) within the `execute()`, it will return `False`
 
-## Appendix
+## <a name="Appendix" style="color: #000;"></a> Appendix
 
-### More Examples on `pdf_client.api`
+### <a name="api-example" style="color: #000;"></a> More Examples on `pdf_client.api` Modules
 
 Create a version:
 
@@ -197,14 +233,14 @@ config.load_from_file('config.json')
 version.Create(name="My New Version").execute()
 ```
 
-Update a version:
+Post text to the server:
 
 ```python
 from pdf_client import config
-from pdf_client.api import version
+from pdf_client.api import content
 
 config.load_from_file('config.json')
-version.Update(5, name="Another Name").execute()
+content.Post(3235, 20, text="my new text").execute()
 ```
 
 Write a whole book to file:
@@ -222,7 +258,7 @@ with open('book.txt', 'w+') as file:
 
 ```
 
-### More Examples on `MultiThreadWorker ` Constructor
+### <a name="worker-example" style="color: #000;"></a> More Examples on `MultiThreadWorker ` Constructor
 
 Get the entire book in the default version:
 
