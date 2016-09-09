@@ -55,7 +55,7 @@ class BaseRequest(object):
     def on_error(self, response):
         return False
 
-    def send_request(self):
+    def execute(self):
 
         if self.base_url is None:
             raise Exception(ERROR_MESSAGE_NO_CONFIG)
