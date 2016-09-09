@@ -1,7 +1,5 @@
 # PDF Client
 
-## <a name="intro" style="color: #000;"></a> Introduction
-
 This is a python client library to provide a more pleasant experience with [pdf-server](https://github.com/nathanielove/pdf-server)
 
 ## Table of Content
