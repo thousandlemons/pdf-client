@@ -1,5 +1,7 @@
 import json
 
+import requests # this import must be present for the load_from_file() method to work
+
 from pdf_client.api.base import BaseRequest
 
 KEY_BASE_URL = 'base_url'
