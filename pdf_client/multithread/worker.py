@@ -1,8 +1,11 @@
+import logging
 from concurrent import futures
 
 from pdf_client.api import book
 from pdf_client.api import content, section
 from pdf_client.api import version
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class MultiThreadWorker(object):
@@ -26,34 +29,70 @@ class MultiThreadWorker(object):
         self._executor = futures.ThreadPoolExecutor(max_workers=self.threads)
 
     def _process_section(self, section_id):
-        text = content.Immediate(section_id, self.source_version).send_request()
-        text = self.processor.process(text, section_id)
-        if self.target_version:
-            content.Post(section_id, self.target_version, text=text).send_request()
-        return section_id, text
+        try:
+            text = content.Immediate(section_id, self.source_version).send_request()
+            text = self.processor.process(text, section_id)
+            if self.target_version:
+                content.Post(section_id, self.target_version, text=text).send_request()
+            _LOGGER.info("Completed processing section id={id}".format(id=section_id))
+            return section_id, text
+        except Exception as e:
+            _LOGGER.exception("Exception raised when processing section id={id}: {e}".format(id=section_id, e=e))
+            raise e
 
     def _recursive_submit(self, node):
-        self._future_list.append(self._executor.submit(self._process_section, node['id']))
+        section_id = node['id']
+        self._future_list.append(self._executor.submit(self._process_section, section_id))
+        _LOGGER.debug("Submitted processing job for section id={id}".format(id=section_id))
         for child in node['children']:
             self._recursive_submit(child)
 
     def start(self):
 
         if not self.source_version:
-            self.source_version = version.List().send_request()[0]['id']
+            version_list = version.List().send_request()
+            if not version_list:
+                _LOGGER.error("Unable to find a default source version. Returning empty array.")
+                return []
+            self.source_version = version_list[0]['id']
+        else:
+            source_version = version.Detail(self.source_version).send_request()
+            if not source_version:
+                _LOGGER.error("Unable to find source version id={id}. Returning empty array.".format(
+                    id=self.source_version))
 
-        if self.create:
+        if self.target_version:
+            if not version.Detail(self.target_version).send_request():
+                _LOGGER.error("Unable to find target version id={id}. Returning empty array.".format(
+                    id=self.target_version))
+                return []
+
+        elif self.create:
             new_version = version.Create(self.name).send_request()
 
             if not new_version:
+                _LOGGER.error("Unable to create a new version. Returning empty array.")
                 return []
 
             self.target_version = new_version['id']
 
+        else:
+            _LOGGER.error("No target version is specified or can be inferred. Returning empty array.")
+
         toc = book.Toc(self.book).send_request() if self.book else section.Toc(self.section).send_request()
 
         if not toc:
+            _LOGGER.error(
+                'No TOC found for book={book} or section={section}. Returning empty array.'.format(
+                    book=self.book,
+                    section=self.section))
             return []
+
+        _LOGGER.info(
+            "Starting job: section={section}, source_version={source}, target_version={target}".format(
+                section=toc['id'],
+                source=self.source_version,
+                target=self.target_version))
 
         self._recursive_submit(toc)
         return futures.as_completed(self._future_list)
