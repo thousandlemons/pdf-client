@@ -350,7 +350,7 @@ def main():
 	# load global config
 	config.load_from_file('config.json')
 	
-	worker = MultiThreadWorker(processor=MyProcessor(), book=3, new=True, name="Removed Digits")
+	worker = MultiThreadWorker(processor=MyProcessor(), book=3, create=True, name="Removed Digits")
 	
 	completed = worker.start()
 	for future in completed:
