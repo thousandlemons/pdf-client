@@ -245,21 +245,6 @@ config.load_from_file('config.json')
 content.Post(3235, 20, text="my new text").execute()
 ```
 
-Write a whole book to file:
-
-```python
-from pdf_client import config
-from pdf_client.api import book, content
-
-config.load_from_file('config.json')
-root_section = book.List().execute()[0]['root_section']
-text = content.Aggregate(root_section).execute()
-
-with open('book.txt', 'w+') as file:
-	file.write(text)
-
-```
-
 ### <a name="worker-example" style="color: #000;"></a> More Examples on `MultiThreadWorker ` Constructor
 
 Get the entire book in the default version:
