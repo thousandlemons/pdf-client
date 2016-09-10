@@ -149,7 +149,7 @@ Hence, the `MultiThreadWorker` in `pdf_client.multithread.worker` module impleme
 | `section` | `int` | The section id to start as the root section. <br> If `book` is present, this parameter will be ignored.
 | `source` | `int` | The source version id, used by the worker to get the text content from the server. <br> If blank, the first version id ("Raw" by default) returned in the `/version/list/` API will be used. 
 | `target` |`int` | The target version id, used by the worker to post the processed texts back to the server. <br> If left blank, the worker will check the `create` parameter. <br> If both this parameter and `create` are blank, the worker is in read-only mode, and no text will be posted to the server.
-| `create` | `bool` | Set it `True` to create a version on the server as `target_version`. <br> If `target_version` is present, this parameter will be ignored, and no version will be created on the server. 
+| `create` | `bool` | Set it `True` to create a version on the server as `target`. <br> If `target` is present, this parameter will be ignored, and no version will be created on the server. 
 | `name` | `string` | The name of the version to be created. <br> This parameter must be present together with `create`.
 
 
