@@ -212,7 +212,7 @@ content.Immediate(3260, 3)	# ==> /content/immediate/3206/3/
 For json data in request message body, use keyword arguements in the constructor. For example,
 
 ```python
-version.Update(5, name="Another Name").execute()
+version.Update(5, name="Another Name")
 ```
 
 Please refer to [Appendix](#api-example) to see more example on the argument keywords.
