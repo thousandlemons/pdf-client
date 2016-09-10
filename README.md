@@ -352,7 +352,7 @@ def main():
 	# load global config
 	config.load_from_file('config.json')
 	
-	worker = MultiThreadWorker(processor=MyProcessor(), book=3, create=True, name="New Name")
+	worker = MultiThreadWorker(processor=MyProcessor(), book=3, create=True, name="Another version!")
 	
 	completed = worker.start()
 	for future in completed:
