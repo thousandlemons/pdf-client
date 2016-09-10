@@ -25,7 +25,7 @@ This is a python client library to provide a more pleasant experience with [pdf-
 
 ## <a name="release" style="color: #000;"></a> Install
 
-The latest release is pdf_client v2.0, released on 9 Sep 2016.
+The latest release is pdf-client-2.0, released on 9 Sep 2016.
 
 To install the package using pip:
 
