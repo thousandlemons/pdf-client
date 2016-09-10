@@ -20,12 +20,13 @@ This is a python client library to provide a more pleasant experience with [pdf-
 * [Appendix](#Appendix)
 	* [More Examples on `pdf_client.api` Modules](#api-example)
 	* [More Examples on `MultiThreadWorker ` Constructor](#worker-example)
-	* [A Recipe of Multithreaded Text Processing: Removing Digits](#Recipe)
+	* [Template: Multithreaded Text Processing](#Recipe)
+	* [Template: Download a Whole Book](#download-book)
 
 
 ## <a name="release" style="color: #000;"></a> Install
 
-The latest release is pdf-client-2.0, released on 9 Sep 2016.
+The latest release is pdf-client-2.0.1, released on 10 Sep 2016.
 
 To install the package using pip:
 
@@ -327,7 +328,7 @@ worker = MultiThreadWorker(processor=ExampleProcessor(),
                            target=20)
 ```
 
-### <a name="Recipe" style="color: #000;"></a> A Recipe of Multithreaded Text Processing: Removing Digits
+### <a name="Recipe" style="color: #000;"></a> Template: Multithreaded Text Processing
 
 ```python
 import re
@@ -340,7 +341,8 @@ from pdf_client.multithread.processor import TextProcessor
 
 class MyProcessor(TextProcessor):
 	def process(self, text, section_id):
-		return re.sub(r'\d+', '', text)
+		# do something here
+		return text
 		
 def main():
 	# enable INFO level logging
@@ -350,10 +352,44 @@ def main():
 	# load global config
 	config.load_from_file('config.json')
 	
-	worker = MultiThreadWorker(processor=MyProcessor(), book=3, create=True, name="Removed Digits")
+	worker = MultiThreadWorker(processor=MyProcessor(), book=3, create=True, name="New Name")
 	
 	completed = worker.start()
 	for future in completed:
 		section_id, text = future.result()
-		# do something else
+		# handle the results
+		
+if __name__ == '__main__':
+	main()
+```
+
+### <a name="download-book" style="color: #000;"></a> Template: Download a Whole Book
+
+```python
+from pdf_client import config
+from pdf_client.api import book
+from pdf_client.api import content
+
+def main():
+    # load global config
+    config.load_from_file('config.json')
+
+    # specify what to download
+    book_id = 1
+    version_id = 4
+
+    # get book details
+    book_data = book.Detail(book_id).execute()
+    root_section = book_data['root_section']
+    
+    # get aggregate text
+    text = content.Aggregate(root_section, version_id).execute()
+
+    # save to file
+    with open(my_book['title'] + '.txt', 'w+') as file:
+        file.write(text)
+
+if __name__ == '__main__':
+    main()
+
 ```
