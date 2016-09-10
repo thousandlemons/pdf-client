@@ -3,7 +3,7 @@ import requests
 ERROR_MESSAGE_NO_CONFIG = '''
 
 No configuration found!
-Add the following before you call send_request()
+Add the following before you call execute()
 
     from pdf_client import config
     config.load_from_file('...')
