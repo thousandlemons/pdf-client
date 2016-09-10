@@ -22,6 +22,7 @@ This is a python client library to provide a more pleasant experience with [pdf-
 	* [More Examples on `MultiThreadWorker ` Constructor](#worker-example)
 	* [Template: Multithreaded Text Processing](#Recipe)
 	* [Template: Download a Whole Book](#download-book)
+	* [Template: Download All Sections of a Book in Individual Files](#download-sections)
 
 
 ## <a name="release" style="color: #000;"></a> Install
@@ -392,4 +393,36 @@ def main():
 if __name__ == '__main__':
     main()
 
+```
+
+### <a name="download-sections" style="color: #000;"></a> Template: Download All Sections of a Book in Individual Files
+
+```python
+import logging
+
+import pdf_client
+from pdf_client import config
+from pdf_client.multithread.processor import TextProcessor
+from pdf_client.multithread.worker import MultiThreadWorker
+
+class SectionDownloader(TextProcessor):
+    def process(self, text, section_id):
+        with open("{id}.txt".format(id=section_id), 'w+') as file:
+            file.write(text)
+        return text
+
+def main():
+    # enable INFO level logging
+    logging.basicConfig()
+    logging.getLogger(pdf_client.multithread.worker.__name__).setLevel(logging.INFO)
+
+    # load global config
+    config.load_from_file('config.json')
+
+    # create a worker and start
+    worker = MultiThreadWorker(processor=SectionDownloader(), book=3, threads=20)
+    worker.start()
+
+if __name__ == '__main__':
+    main()
 ```
