@@ -13,7 +13,7 @@ class MultiThreadWorker(object):
 
     threads = 10
     _executor = None
-    _future_list = []
+    _future_list = None
 
     book = None
     section = None
@@ -27,6 +27,7 @@ class MultiThreadWorker(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
         self._executor = futures.ThreadPoolExecutor(max_workers=self.threads)
+        self._future_list = []
 
     def _process_section(self, section_id):
         try:
